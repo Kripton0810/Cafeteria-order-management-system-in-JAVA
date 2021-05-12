@@ -918,7 +918,7 @@ public class adminMain extends javax.swing.JFrame {
             model.removeRow(i);
         }
             
-        String str = "select * from employee a left join sales b on a.Empid = b.empid";
+        String str = "select a.Empid,a.Empname, a.Basics_sal, a.target, a.Empemail, count(a.Empid) from employee a left join sales b on a.Empid = b.empid and year(b.saleDate)=year(sysdate()) and month(b.saleDate)=month(sysdate())  group by(a.Empid)";
         dbcon obj = new dbcon();
         double sal,newsal=0;
         int acta,ccta=0;
@@ -929,24 +929,20 @@ public class adminMain extends javax.swing.JFrame {
             ResultSet rs = stm.executeQuery(str);
             while(rs.next())
             {
-                String s = "select count(*),saleDate from sales group by(empid) having year(saleDate)=year(sysdate()) and month(saleDate) = month(sysdate()) and empid='"+rs.getString(1)+"'";
-                sal = rs.getDouble(8);
-                acta = rs.getInt(9);
+               sal = rs.getDouble(3);
+                acta = rs.getInt(4);
                 try
                 {
-                    stm = con.createStatement();
-                    ResultSet rs1 = stm.executeQuery(s);
-                    rs1.next();
-                    if(rs1.getString(1)==null)
+                    if(rs.getString(1)==null)
                     {
                         ccta=0;
                     }
-                    ccta = rs1.getInt(1);
+                    ccta = rs.getInt(6);
                     
                     newsal = new SalaryMaker().salary(acta, ccta, sal);
-                model.insertRow(model.getRowCount(), new Object[]{rs.getString(1),rs.getString(2),rs.getString(6),newsal});
+                model.insertRow(model.getRowCount(), new Object[]{rs.getString(1),rs.getString(2),rs.getString(5),newsal});
                 String s11  = "insert into salary values('"+rs.getString(1)+"',sysdate(),"+newsal+","+ccta+");";
-                SendSalary.SendSalary(rs.getString(6), newsal, rs.getString(2),ccta);
+                SendSalary.SendSalary(rs.getString(5), newsal, rs.getString(2),ccta);
                 
                 stm = con.createStatement();
                 stm.execute(s11);
@@ -1011,7 +1007,7 @@ public void SelUpdate(String str)
          */
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
+                if ("Windows".equals(info.getName())) {
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
                     break;
                 }

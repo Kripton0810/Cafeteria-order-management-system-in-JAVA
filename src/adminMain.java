@@ -13,6 +13,7 @@ import java.awt.Image;
 import java.io.File;
 import javax.swing.*;
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import javax.swing.table.DefaultTableModel;
 public class adminMain extends javax.swing.JFrame {
 
@@ -514,15 +515,28 @@ public class adminMain extends javax.swing.JFrame {
         });
 
         jButton10.setText("SHOW ALL PREVIOUS SALARY");
+        jButton10.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton10ActionPerformed(evt);
+            }
+        });
 
         jTable4.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
             new String [] {
-                "EMPID", "EMPNAME", "EMPEMAIL", "EMP SALARY"
+                "DATE", "EMPID", "EMPNAME", "EMPEMAIL", "EMP SALARY"
             }
-        ));
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, true
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
         jScrollPane4.setViewportView(jTable4);
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
@@ -940,7 +954,8 @@ public class adminMain extends javax.swing.JFrame {
                     ccta = rs.getInt(6);
                     
                     newsal = new SalaryMaker().salary(acta, ccta, sal);
-                model.insertRow(model.getRowCount(), new Object[]{rs.getString(1),rs.getString(2),rs.getString(5),newsal});
+                    String d = new SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
+                model.insertRow(model.getRowCount(), new Object[]{d,rs.getString(1),rs.getString(2),rs.getString(5),newsal});
                 String s11  = "insert into salary values('"+rs.getString(1)+"',sysdate(),"+newsal+","+ccta+");";
                 SendSalary.SendSalary(rs.getString(5), newsal, rs.getString(2),ccta);
                 
@@ -958,6 +973,33 @@ public class adminMain extends javax.swing.JFrame {
             System.out.println(e);
         }
     }//GEN-LAST:event_jButton9ActionPerformed
+
+    private void jButton10ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton10ActionPerformed
+        // TODO add your handling code here:
+        String str = "SELECT * FROM coffeeshop.salary a join employee b on a.empid= b.empid";
+         DefaultTableModel model = (DefaultTableModel) jTable4.getModel();
+        int r = model.getRowCount();
+        for(int i = r-1;i>=0;i--)
+        {
+            model.removeRow(i);
+        }
+        dbcon obj = new dbcon();
+        Connection con = obj.connection();
+         try
+        {
+            Statement stm = con.createStatement();
+            ResultSet rs = stm.executeQuery(str);
+            while(rs.next())
+            {
+                 model.insertRow(model.getRowCount(), new Object[]{rs.getString(2),rs.getString(1),rs.getString(6),rs.getString(10),rs.getString(3)});
+            }
+        }catch(Exception e)
+        {
+            
+        }
+         
+            
+    }//GEN-LAST:event_jButton10ActionPerformed
 public void SelUpdate(String str)
 {
         dbcon obj = new dbcon();
